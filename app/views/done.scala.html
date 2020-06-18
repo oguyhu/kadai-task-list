@@ -1,0 +1,49 @@
+@import b3.vertical.fieldConstructor
+
+@(taskSeq: Seq[Task])(implicit MessagesProvider: MessagesProvider, request: RequestHeader)
+
+@main("Done Tasks") {
+
+<div class="container">
+    <h1>Done Tasks</h1>
+    <table class="table table-basic">
+        <thead>
+        <tr>
+            <th><a href="@routes.GetTasksController.index">Go Back</a></th>
+        </tr>
+        </thead>
+    </table>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th class="col-sm-2">Status</th>
+            <th class="col-sm-3">Date</th>
+            <th class="col-sm-3">Title</th>
+            <th class="col-sm-4">Content</th>
+        </tr>
+        </thead>
+        <tbody>
+        @for(task <- taskSeq) {
+        <tr>
+            <td>
+                @b3.formCSRF(routes.UpdateStatusController.undo(task.id.get)) {
+                @b3.submit('class -> "btn btn-default") {
+                Change Status
+                }
+                }
+            </td>
+            <td>@Task.dateToString(task)</td>
+            <td><a href="@routes.GetTaskController.index(task.id.get)">@task.title</a></td>
+            <td>@task.content.getOrElse("")</td>
+        </tr>
+        }
+        </tbody>
+    </table>
+    @b3.formCSRF(routes.DeleteTasksController.deleteDoneTasks) {
+    @b3.submit('class -> "btn btn-danger") {
+    Delete all these done tasks
+    }
+    }
+</div>
+
+}
