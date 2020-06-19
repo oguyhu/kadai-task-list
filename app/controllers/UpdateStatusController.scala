@@ -7,16 +7,17 @@ import models.Task
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import scalikejdbc.AutoSession
+import services.TaskService
 
 @Singleton
-class UpdateStatusController @Inject()(components: ControllerComponents)
+class UpdateStatusController @Inject()(components: ControllerComponents, taskService: TaskService)
   extends AbstractController(components)
     with I18nSupport
     with TaskControllerSupport {
 
   def change(taskId: Long) = Action { implicit request =>
-    val task = Task.findById(taskId).get
-    val result = updateStatus(task, 0)
+    implicit val session = AutoSession
+    val result = taskService.updateStatus(taskId, 0)
     if (result > 0)
       Redirect(routes.GetTasksController.index())
     else
@@ -24,19 +25,11 @@ class UpdateStatusController @Inject()(components: ControllerComponents)
   }
 
   def undo(taskId: Long) = Action { implicit request =>
-    val task = Task.findById(taskId).get
-    val result = updateStatus(task, 1)
+    implicit val session = AutoSession
+    val result = taskService.updateStatus(taskId, 1)
     if (result > 0)
       Redirect(routes.DoneTasksController.index())
     else
       InternalServerError(Messages("UpdateStatusError"))
-  }
-
-  def updateStatus(task: Task, status: Int) = {
-    implicit val session = AutoSession
-    Task.updateById(task.id.get).withAttributes(
-      'status -> status,
-      'updateAt -> ZonedDateTime.now
-    )
   }
 }

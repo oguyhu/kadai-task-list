@@ -25,32 +25,6 @@ object Task extends SkinnyCRUDMapper[Task] {
   override def extract(rs: WrappedResultSet, n: ResultName[Task]): Task =
     autoConstruct(rs, n)
 
-  /**  完了していないタスクのリストを返す
-   * @return List[Task] */
-  def getTasks: List[Task] = findAllByStatus(1)
-
-  /**  完了したタスクのリストを返す
-   * @return List[Task] */
-  def getDoneTasks: List[Task] = findAllByStatus(0)
-
-  /**  完了していないタスクの数を返す
-   * @return Long  */
-  def countTasks = countByStatus(1)
-
-  /**  完了したタスクの数を返す
-   * @return Long  */
-  def countDoneTasks = countByStatus(0)
-
-  def findAllByStatus(status: Int) = {
-    val task = Task.defaultAlias
-    findAllBy(sqls.eq(task.status, status))
-  }
-
-  def countByStatus(status: Int) = {
-    val task = Task.defaultAlias
-    countBy(sqls.eq(task.status, status))
-  }
-
   val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("'at' h:mm a 'on' EEEE, dd'th' MMMM", Locale.ENGLISH)
 
   /**  scheduleがNoneの場合は空文字を返す。

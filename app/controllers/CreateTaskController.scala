@@ -7,9 +7,10 @@ import models.Task
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import scalikejdbc.AutoSession
+import services.TaskService
 
 @Singleton
-class CreateTaskController @Inject()(components: ControllerComponents)
+class CreateTaskController @Inject()(components: ControllerComponents, taskService: TaskService)
   extends AbstractController(components)
     with I18nSupport
     with TaskControllerSupport {
@@ -25,13 +26,7 @@ class CreateTaskController @Inject()(components: ControllerComponents)
         formWithErrors => BadRequest(views.html.create(formWithErrors)), { model =>
           implicit val session = AutoSession
           val now = ZonedDateTime.now
-          val result = Task.createWithAttributes(
-            'title -> model.title,
-            'content -> model.content,
-            'schedule -> model.schedule,
-            'createAt -> now,
-            'updateAt -> now
-          )
+          val result = taskService.create(model)
           if (result > 0) {
             Redirect(routes.GetTasksController.index())
           } else {
